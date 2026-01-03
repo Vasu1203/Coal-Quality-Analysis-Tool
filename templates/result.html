@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GCV Prediction Result</title>
+    <style>
+        :root {
+            --bg-dark: #050910;
+            --card-bg: #111722;
+            --accent: #00b894;
+            --accent-soft: rgba(0, 184, 148, 0.25);
+            --accent-blue: #0984e3;
+            --text-main: #f5f7fb;
+            --text-muted: #b3b8c4;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle at top left, #1b2838, #050910 55%);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 0 22px rgba(0, 0, 0, 0.7);
+            display: flex;
+            gap: 26px;
+            padding: 26px 30px;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .card-left,
+        .card-right {
+            flex: 1;
+        }
+
+        .card-left h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.9rem;
+            letter-spacing: 0.4px;
+        }
+
+        .subtitle {
+            margin: 0 0 20px 0;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .stat-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .stat-chip {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .stat-value {
+            margin-top: 4px;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .grade-tag {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            border: 1px solid var(--accent);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .coal-type-text {
+            margin-top: 8px;
+            font-size: 0.98rem;
+        }
+
+        .btn-row {
+            margin-top: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--accent-blue);
+            border-radius: 999px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: background 0.18s ease, transform 0.18s ease,
+                        box-shadow 0.18s ease;
+            box-shadow: 0 0 10px rgba(9, 132, 227, 0.4);
+        }
+
+        .btn:hover {
+            background: #076fbd;
+            transform: translateY(-1px);
+            box-shadow: 0 0 16px rgba(9, 132, 227, 0.7);
+        }
+
+        .coal-image-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .coal-image {
+            width: 220px;
+            height: 220px;
+            border-radius: 16px;
+            object-fit: cover;
+            box-shadow: 0 0 16px rgba(0, 0, 0, 0.7);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .coal-label {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .error-text {
+            color: #ff7675;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%   { transform: translateY(0); }
+            50%  { transform: translateY(-6px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Mobile layout */
+        @media (max-width: 768px) {
+            .card {
+                flex-direction: column-reverse;
+                padding: 22px 20px;
+            }
+            .coal-image {
+                width: 180px;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="card">
+
+        {% if prediction is string and prediction.startswith('Error') %}
+
+            <!-- Error state -->
+            <div class="card-left" style="flex: 1; text-align: center;">
+                <h1>Prediction Error</h1>
+                <p class="subtitle">
+                    Something went wrong while processing your input.
+                </p>
+                <div class="error-text">{{ prediction }}</div>
+
+                <div class="btn-row">
+                    <a href="{{ url_for('index') }}" class="btn">⬅ Back to Predictor</a>
+                </div>
+            </div>
+
+        {% else %}
+
+            <!-- Left: prediction + grade -->
+            <div class="card-left">
+                <h1>Prediction Result</h1>
+                <p class="subtitle">
+                    Here is the estimated Gross Calorific Value (GCV) and coal grade
+                    based on your input.
+                </p>
+
+                <div class="stat-row">
+                    <div class="stat-chip">
+                        <div class="stat-label">Predicted GCV</div>
+                        <div class="stat-value">
+                            {{ prediction }} <span style="font-size: 0.9rem;">kcal/kg</span>
+                        </div>
+                    </div>
+
+                    {% if grade %}
+                        <div class="stat-chip">
+                            <div class="stat-label">Coal Grade</div>
+                            <div class="stat-value">
+                                {{ grade }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if coal_type %}
+                        <div class="coal-type-text">
+                            Coal type: <strong>{{ coal_type }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="btn-row">
+                    <a href="{{ url_for('index') }}" class="btn">⬅ Back to Predictor</a>
+                </div>
+            </div>
+
+            <!-- Right: coal image -->
+            <div class="card-right">
+                {% if coal_type and coal_image %}
+                    <div class="coal-image-wrapper">
+                        <img src="{{ url_for('static', filename=coal_image) }}"
+                             alt="{{ coal_type }} coal"
+                             class="coal-image">
+                        <div class="coal-label">
+                            Visual representation of <strong>{{ coal_type }}</strong> coal
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+</body>
+</html>
